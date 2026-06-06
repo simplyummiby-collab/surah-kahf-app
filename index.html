@@ -1,0 +1,546 @@
+<!-- Code 12: Adds GitHub image file paths for all Suratul Kahf sections -->
+
+<link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&display=swap" rel="stylesheet">
+
+<div id="kahfApp">
+  <style>
+    #kahfApp {
+      max-width: 850px;
+      margin: auto;
+      padding: 18px;
+      font-family: system-ui, sans-serif;
+      background: #fff8fb;
+      color: #2f2f2f;
+      border-radius: 22px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #f1d7df;
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.06);
+    }
+
+    .progress-wrap {
+      height: 10px;
+      background: #f4dfe7;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: #d98ca8;
+      transition: width .3s ease;
+    }
+
+    .section-index {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 8px;
+      margin: 14px 0 18px;
+    }
+
+    .index-pill {
+      border: 1px solid #efd2dc;
+      background: #fff;
+      color: #5c3f4a;
+      border-radius: 14px;
+      padding: 9px 10px;
+      font-size: 13px;
+      cursor: pointer;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .index-pill.active {
+      background: #d98ca8;
+      color: white;
+      border-color: #d98ca8;
+      font-weight: 800;
+    }
+
+    .image-slot {
+      min-height: 210px;
+      border-radius: 20px;
+      background: #f7dce7;
+      background-size: cover;
+      background-position: center;
+      margin: 16px 0;
+      display: grid;
+      place-items: center;
+      color: #7d5865;
+      font-weight: 700;
+      text-align: center;
+      padding: 18px;
+    }
+
+    h1, h2 {
+      margin-bottom: 6px;
+    }
+
+    .subtle {
+      color: #7a626b;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .ayah-range {
+      color: #8b6d78;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .ayah-block {
+      margin: 34px 0;
+      padding-bottom: 24px;
+      border-bottom: 1px solid #f3d6df;
+    }
+
+    .arabic-ayah {
+      direction: rtl;
+      text-align: right;
+      font-size: 42px;
+      line-height: 2.6;
+      font-family: "Amiri Quran", "Amiri", "Traditional Arabic", serif;
+      margin-bottom: 14px;
+      font-weight: 400;
+      letter-spacing: 0;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    .english-ayah {
+      background: #fff8fb;
+      border-radius: 14px;
+      padding: 12px 14px;
+      line-height: 1.7;
+      font-size: 16px;
+    }
+
+    .ayah-number {
+      display: inline;
+      margin-left: 10px;
+      color: #8b4f63;
+      font-size: 30px;
+      font-family: "Amiri Quran", "Amiri", "Traditional Arabic", serif;
+      vertical-align: baseline;
+    }
+
+    .resources {
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 16px;
+      background: #fff3f7;
+      border: 1px solid #f3d6df;
+    }
+
+    .resources h3 {
+      margin-top: 0;
+      font-size: 17px;
+    }
+
+    .resources h3::before {
+      content: "📚 ";
+    }
+
+    .resources ul {
+      margin-bottom: 0;
+      padding-left: 20px;
+    }
+
+    .completion-message {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 16px;
+      background: #fff3f7;
+      border: 1px solid #f3d6df;
+      text-align: center;
+      font-weight: 700;
+      color: #8b4f63;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 12px 18px;
+      cursor: pointer;
+      font-weight: 700;
+      background: #d98ca8;
+      color: white;
+    }
+
+    button.secondary {
+      background: #f0d7df;
+      color: #5c3f4a;
+    }
+
+    @media (max-width: 600px) {
+      .arabic-ayah {
+        font-size: 32px;
+        line-height: 2.4;
+      }
+
+      .ayah-number {
+        font-size: 24px;
+      }
+
+      .card {
+        padding: 16px;
+      }
+    }
+  </style>
+
+  <div class="card">
+    <div class="progress-wrap">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div id="sectionIndex" class="section-index"></div>
+    <div id="pageContent"></div>
+
+    <div class="buttons">
+      <button class="secondary" onclick="prevPage()">← Back</button>
+      <button id="nextBtn" onclick="nextPage()">Next →</button>
+      <button class="secondary" onclick="resetProgress()">Reset</button>
+    </div>
+  </div>
+
+  <script>
+    const pages = [
+      {
+        type: "home",
+        title: "Suratul Kahf Reading",
+        subtitle: "A calm section-by-section reading journey through Surah Al-Kahf.",
+        image: "images/01-kahf-opening-cave.jpg",
+        imageLabel: "Opening image: cave-style landscape",
+        resourcesTitle: "Resources for Suratul Kahf",
+        resources: [
+          { label: "Khutbah or lecture link goes here", url: "#" },
+          { label: "Virtues of Suratul Kahf resource goes here", url: "#" },
+          { label: "Tafsir overview link goes here", url: "#" }
+        ]
+      },
+      {
+        title: "Opening Praise & Warning",
+        range: "Al-Kahf 18:1–8",
+        start: 1,
+        end: 8,
+        image: "images/02-revelation-dawn.jpg",
+        imageLabel: "Image idea: soft light over a desert horizon",
+        combined: "Loading text...",
+        resourcesTitle: "Explore Further",
+        resources: [{ label: "Tafsir / explanation for 18:1–8", url: "#" }]
+      },
+      {
+        title: "The People of the Cave",
+        range: "Al-Kahf 18:9–26",
+        start: 9,
+        end: 26,
+        image: "images/03-cave-of-protection.jpg",
+        imageLabel: "Image idea: cave entrance with light, no people or animals",
+        combined: "Loading text...",
+        resourcesTitle: "Explore Further",
+        resources: [{ label: "Reading or lecture about the People of the Cave", url: "#" }]
+      },
+      {
+        title: "Hold Fast to Revelation",
+        range: "Al-Kahf 18:27–31",
+        start: 27,
+        end: 31,
+        image: "images/04-guidance-and-steadfastness.jpg",
+        imageLabel: "Image idea: path of light or peaceful sunrise",
+        combined: "Loading text...",
+        resourcesTitle: "Explore Further",
+        resources: [{ label: "Resource for patience and staying with the righteous", url: "#" }]
+      },
+      {
+        title: "The Two Gardens",
+        range: "Al-Kahf 18:32–44",
+        start: 32,
+        end: 44,
+        image: "images/05-owner-of-two-gardens.jpg",
+        imageLabel: "Image idea: garden on one side, faded garden on the other",
+        combined: "Loading text...",
+        resourcesTitle: "Explore Further",
+        resources: [{ label: "Lecture or tafsir on the two gardens", url: "#" }]
+      },
+      {
+        title: "The Life of This World",
+        range: "Al-Kahf 18:45–49",
+        start: 45,
+        end: 49,
+        image: "images/06-parable-of-worldly-life.jpg",
+        imageLabel: "Image idea: rain, plants, then faded scattered leaves",
+        combined: "Loading text...",
+        resourcesTitle: "Explore Further",
+        resources: []
+      },
+      {
+        title: "Accountability & False Allies",
+        range: "Al-Kahf 18:50–59",
+        start: 50,
+        end: 59,
+        image: "images/07-choice-and-accountability.jpg",
+        imageLabel: "Image idea: two paths, warning light, no figures",
+        combined: "Loading text...",
+        resourcesTitle: "Explore Further",
+        resources: []
+      },
+      {
+        title: "Musa and Khidr",
+        range: "Al-Kahf 18:60–82",
+        start: 60,
+        end: 82,
+        image: "images/08-musa-and-khidr-boat.jpg",
+        imageLabel: "Image idea: sea, boat, shoreline, no people or animals",
+        combined: "Loading text...",
+        resourcesTitle: "Explore Further",
+        resources: [{ label: "Reading or lecture about Musa and Khidr", url: "#" }]
+      },
+      {
+        title: "Dhul-Qarnayn",
+        range: "Al-Kahf 18:83–98",
+        start: 83,
+        end: 98,
+        image: "images/09-dhul-qarnayn-barrier.jpg",
+        imageLabel: "Image idea: mountain pass, iron barrier, strong landscape",
+        combined: "Loading text...",
+        resourcesTitle: "Explore Further",
+        resources: [{ label: "Reading or lecture about Dhul-Qarnayn", url: "#" }]
+      },
+      {
+        title: "Final Warning & Hope",
+        range: "Al-Kahf 18:99–110",
+        start: 99,
+        end: 110,
+        image: "images/10-meeting-your-lord.jpg",
+        imageLabel: "Image idea: vast horizon, sunrise, light returning",
+        combined: "Loading text...",
+        resourcesTitle: "Explore Further",
+        resources: []
+      }
+    ];
+
+    let current = Number(localStorage.getItem("kahfProgress")) || 0;
+
+    function toArabicNumber(num) {
+      return String(num).replace(/\d/g, d => "٠١٢٣٤٥٦٧٨٩"[d]);
+    }
+
+    function scrollToAppTop() {
+      document.getElementById("kahfApp").scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
+
+    function renderIndex() {
+      const index = document.getElementById("sectionIndex");
+      index.innerHTML = "";
+
+      pages.forEach((page, i) => {
+        const pill = document.createElement("button");
+        pill.className = "index-pill" + (i === current ? " active" : "");
+        pill.textContent = i === 0 ? "🏠 Home" : `${i}. ${page.title}`;
+        pill.onclick = () => {
+          current = i;
+          renderPage();
+          scrollToAppTop();
+        };
+        index.appendChild(pill);
+      });
+    }
+
+    function renderResources(page) {
+      if (!page.resources || page.resources.length === 0) return "";
+
+      return `
+        <div class="resources">
+          <h3>${page.resourcesTitle || "Explore Further"}</h3>
+          <ul>
+            ${page.resources.map(link => `<li><a href="${link.url}" target="_blank">${link.label}</a></li>`).join("")}
+          </ul>
+        </div>
+      `;
+    }
+
+    function renderCompletionMessage() {
+      if (current !== pages.length - 1) return "";
+
+      return `
+        <div class="completion-message">
+          You have reached the end of Suratul Kahf.
+        </div>
+      `;
+    }
+
+    function updateButtons() {
+      const nextBtn = document.getElementById("nextBtn");
+
+      if (nextBtn) {
+        nextBtn.style.display = current === pages.length - 1 ? "none" : "inline-block";
+      }
+    }
+
+    function renderPage() {
+      const page = pages[current];
+      const percent = (current / (pages.length - 1)) * 100;
+
+      document.getElementById("progressBar").style.width = percent + "%";
+      renderIndex();
+
+      if (page.type === "home") {
+        document.getElementById("pageContent").innerHTML = `
+          <h1>${page.title}</h1>
+          <p class="subtle">${page.subtitle}</p>
+
+          <div class="image-slot" style="${page.image ? `background-image:url('${page.image}')` : ""}">
+            ${page.image ? "" : page.imageLabel}
+          </div>
+
+          <p class="subtle">
+            Move through Suratul Kahf by section. Your place will be saved in this browser.
+          </p>
+
+          ${renderResources(page)}
+        `;
+      } else {
+        document.getElementById("pageContent").innerHTML = `
+          <p class="subtle">Section ${current} of ${pages.length - 1}</p>
+          <h2>${page.title}</h2>
+          <div class="ayah-range">${page.range}</div>
+
+          <div class="image-slot" style="${page.image ? `background-image:url('${page.image}')` : ""}">
+            ${page.image ? "" : page.imageLabel}
+          </div>
+
+          <div class="combined-text">${page.combined || "Loading text..."}</div>
+
+          ${renderResources(page)}
+          ${renderCompletionMessage()}
+        `;
+      }
+
+      updateButtons();
+      localStorage.setItem("kahfProgress", current);
+    }
+
+    async function findTranslationId() {
+      const response = await fetch("https://api.quran.com/api/v4/resources/translations?language=en");
+      const data = await response.json();
+
+      const translations = data.translations || [];
+
+      const sahih = translations.find(t =>
+        (t.name || "").toLowerCase().includes("sahih international") ||
+        (t.author_name || "").toLowerCase().includes("sahih international")
+      );
+
+      const muhsin = translations.find(t =>
+        (t.name || "").toLowerCase().includes("muhsin") ||
+        (t.author_name || "").toLowerCase().includes("muhsin") ||
+        (t.name || "").toLowerCase().includes("hilali")
+      );
+
+      return sahih?.id || sahih?.resource_id || muhsin?.id || muhsin?.resource_id;
+    }
+
+    async function loadSurahKahfText() {
+      try {
+        const translationId = await findTranslationId();
+
+        if (!translationId) {
+          throw new Error("No Sahih International or Muhsin Khan translation found.");
+        }
+
+        let allVerses = [];
+        let pageNumber = 1;
+        let totalPages = 1;
+
+        while (pageNumber <= totalPages) {
+          const apiUrl =
+            `https://api.quran.com/api/v4/verses/by_chapter/18?language=en&words=false&translations=${translationId}&fields=text_uthmani&per_page=50&page=${pageNumber}`;
+
+          const response = await fetch(apiUrl);
+          const data = await response.json();
+
+          allVerses = allVerses.concat(data.verses || []);
+          totalPages = data.pagination?.total_pages || 1;
+          pageNumber++;
+        }
+
+        const verses = allVerses.map(v => ({
+          number: Number(v.verse_key.split(":")[1]),
+          arabic: v.text_uthmani,
+          english: v.translations?.[0]?.text || ""
+        }));
+
+        pages.forEach(page => {
+          if (!page.start || !page.end) return;
+
+          const matchingVerses = verses.filter(v =>
+            v.number >= page.start && v.number <= page.end
+          );
+
+          page.combined = matchingVerses.map(v => `
+            <div class="ayah-block">
+              <div class="arabic-ayah">
+                <span class="ayah-number">۝${toArabicNumber(v.number)}</span>${v.arabic}
+              </div>
+              <div class="english-ayah">
+                <strong>${v.number}.</strong> ${v.english}
+              </div>
+            </div>
+          `).join("");
+        });
+
+        renderPage();
+      } catch (error) {
+        pages.forEach(page => {
+          if (!page.start || !page.end) return;
+          page.combined = "Text could not be loaded. Please check the translation source or API connection.";
+        });
+
+        renderPage();
+      }
+    }
+
+    function nextPage() {
+      if (current < pages.length - 1) {
+        current++;
+        renderPage();
+        scrollToAppTop();
+      }
+    }
+
+    function prevPage() {
+      if (current > 0) {
+        current--;
+        renderPage();
+        scrollToAppTop();
+      }
+    }
+
+    function resetProgress() {
+      current = 0;
+      localStorage.setItem("kahfProgress", current);
+      renderPage();
+      scrollToAppTop();
+    }
+
+    renderPage();
+    loadSurahKahfText();
+  </script>
+</div>
